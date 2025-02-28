@@ -19,3 +19,8 @@
     font-size: 20px;
     padding: 10px 20px;
 }
+
+a {
+    all : unset;
+    cursor : pointer;
+}
