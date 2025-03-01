@@ -1,5 +1,5 @@
 #stopwatch {
-    font-family: monospace;
+    font-family: Futura;
     font-size: 96px;
     margin: auto;
     height: 55%;
@@ -23,4 +23,12 @@
 a {
     all : unset;
     cursor : pointer;
+}
+
+#centi-secs {
+    position: relative;
+    bottom: 20px;
+    left: 5px;
+    font-family: Verdana;
+    font-size: 24px;
 }

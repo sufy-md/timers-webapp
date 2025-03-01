@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/styles.css">
+        <link rel="stylesheet" href="/static/stopwatch.css">
+        <title>
+            Stopwatch
+        </title>
+    </head>
+    <body>
+        <p id="stopwatch"><span id="stopwatch-text" style="color: #1fec1fb9;">0h 00m 00s</span><span id="centi-secs" style="color: #1fec1fb9">00</span></p>
+        <a href='#' onclick="event.stopPropagation(); addButton()" id="btn" style="display: none;">Send time to account >></a>
+        <script>
+            var running = false;
+            var intervalId, startTime;
+            var cs, s, m, h;
+
+            function addButton() {
+                
+            }
+
+            function stop() {
+                var elem = document.getElementById('btn');
+                elem.style = "display: flex;";
+
+                var elem = document.getElementById('stopwatch-text');
+                elem.style = "color: #d90e0eb9;";
+
+                elem = document.getElementById('centi-secs');
+                elem.style = "color: #d90e0eb9;";
+
+                centi_secs = 0;
+                
+                running = false;
+                clearInterval(intervalId);
+            }
+            
+            function start() {
+                startTime = Date.now();
+
+                var elem = document.getElementById('btn');
+                elem.style = "display: none;";
+
+                var elem = document.getElementById('stopwatch-text');
+                elem.style = "color: #1fec1fb9;";
+
+                var elem2 = document.getElementById('centi-secs');
+                elem2.style = "color: #1fec1fb9;";
+
+                function updater() {
+                    // centi_secs += 1;
+                    // var secs = Math.floor(centi_secs / 100);
+                    // hours = Math.floor(secs / 3600);
+                    // minutes = Math.floor((secs % 3600) / 60);
+                    // s = Math.floor(secs % 60);
+                    // elem.innerHTML = Math.floor(hours / 10) + (hours % 10) + "h " + Math.floor(minutes / 10) + (minutes % 10) + "m " + Math.floor(s/10) + (s % 10) + "s";
+                    // display_centisecs = Math.floor((centi_secs % 100) / 10) + '';
+                    // display_centisecs += (centi_secs % 10) + '';
+                    // elem2.innerHTML = display_centisecs;
+
+                    elapsed = Date.now() - startTime;
+                    cs = Math.floor(elapsed / 10) % 100;
+                    s = Math.floor(elapsed / 1000) % 60;
+                    m = Math.floor(elapsed / 60000) % 60;
+                    h = Math.floor(elapsed / 3600000);
+
+                    document.getElementById('stopwatch-text').innerHTML = `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+                    document.getElementById('centi-secs').innerHTML = Math.floor(cs / 10) + "" + (cs % 10);
+                }
+                
+                running = true;
+                intervalId = setInterval(updater, 10);
+            }
+
+            document.addEventListener('click', function() {
+                if (running) { stop(); }
+                else { start(); }
+            });
+        </script>
+    </body>
+</html>
