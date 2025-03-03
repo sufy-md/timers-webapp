@@ -3,7 +3,6 @@ from beaker.middleware import SessionMiddleware
 from db.sql_helper import helper
 
 import os
-
 os.environ['BEAKER_SESSION'] = '1'
 
 session_opts = {
@@ -51,6 +50,7 @@ def login():
             return template("login.html", display='flex')
         
         session['user'] = username
+        session['user_id'] = status
         session.save()
         redirect('/stopwatch')
 
