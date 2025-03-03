@@ -7,6 +7,7 @@
     </head>
     <body>
         <div class="authform">
+            <p class="hidden-error" style="display: {{display}};">Username already exists.</p>
             <form action="/signup" method="post">
                 <input class="textfield" type="text" name="username" placeholder="Pick a username" required>
                 <input class="textfield" type="password" name="password" placeholder="Pick a password" required>

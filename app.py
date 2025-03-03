@@ -1,6 +1,19 @@
-from bottle import Bottle, request, response, static_file, template
+from bottle import Bottle, redirect, request, response, run, static_file, template
+from beaker.middleware import SessionMiddleware
+from db.sql_helper import helper
+
+import os
+
+os.environ['BEAKER_SESSION'] = '1'
+
+session_opts = {
+    'session.type': 'file',
+    'session.auto': True,
+    'session.data_dir': './sessions'
+}
 
 app = Bottle()
+session_app = SessionMiddleware(app, session_opts)
 
 @app.route('/')
 def hello():
@@ -16,22 +29,39 @@ def signup():
         username = request.forms.get('username')
         password = request.forms.get('password')
 
-        pass
+        status = helper(username, password).signup()
+        if (not status):
+            return template("signup.html", display='flex')
+        
+        redirect('/login')
 
-    return template("signup.html", error=None)
+    return template("signup.html", display='none')
 
 @app.route('/login', method=['POST', 'GET'])
 def login():
+    print("keys: ", request.environ.keys())
+    session = request.environ.get('beaker.session')
+
     if request.method == 'POST':
         username = request.forms.get('username')
         password = request.forms.get('password')
 
-        pass
+        status = helper(username, password).login()
+        if (not status):
+            return template("login.html", display='flex')
+        
+        session['user'] = username
+        session.save()
+        redirect('/stopwatch')
 
-    return template("login.html", error=None)
+    return template("login.html", display='none')
 
 @app.route('/stopwatch')
 def stopwatch():
-    return template('stopwatch.html')
+    session = request.environ.get('beaker.session')
+    if not session or 'user' not in session:
+        redirect('/login')
+    
+    return template('stopwatch.html', user=session['user'])
 
-app.run(host='localhost', port=8080, debug=True)
+run(session_app, host='localhost', port=8080, debug=True)
