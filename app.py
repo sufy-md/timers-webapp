@@ -1,8 +1,10 @@
 from bottle import Bottle, redirect, request, response, run, static_file, template
 from beaker.middleware import SessionMiddleware
-from db.sql_helper import helper
+from db.sql_helper import auth_helper, helper
 
+import json
 import os
+
 os.environ['BEAKER_SESSION'] = '1'
 
 session_opts = {
@@ -28,7 +30,7 @@ def signup():
         username = request.forms.get('username')
         password = request.forms.get('password')
 
-        status = helper(username, password).signup()
+        status = auth_helper(username, password).signup()
         if (not status):
             return template("signup.html", display='flex')
         
@@ -41,11 +43,14 @@ def login():
     print("keys: ", request.environ.keys())
     session = request.environ.get('beaker.session')
 
+    if 'user' in session:
+        redirect('/stopwatch')
+
     if request.method == 'POST':
         username = request.forms.get('username')
         password = request.forms.get('password')
 
-        status = helper(username, password).login()
+        status = auth_helper(username, password).login()
         if (not status):
             return template("login.html", display='flex')
         
@@ -63,5 +68,32 @@ def stopwatch():
         redirect('/login')
     
     return template('stopwatch.html', user=session['user'])
+
+@app.route('/get-categories', method=['POST'])
+def get_categories():
+    session = request.environ.get('beaker.session')
+    user_id = session['user_id']
+
+    categories = helper(user_id).fetch_categories()
+    response.content_type = 'application/json'
+    return json.dumps(categories)
+
+@app.route('/create-watch', method=['POST'])
+def create_watch():
+    session = request.environ.get('beaker.session')
+    user_id = session['user_id']
+
+    data = request.json
+    watch_name = data.get('name').strip()
+    cat = data.get('category_id')
+    subcat = data.get('subcategory_id') or None
+
+    parent_id = subcat if subcat else cat
+    create = helper(user_id).create_watch(parent_id, watch_name)
+
+    if (not create):
+        return "Error - Duplicate", 409
+    
+    return "Success", 201
 
 run(session_app, host='localhost', port=8080, debug=True)

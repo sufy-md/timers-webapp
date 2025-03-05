@@ -2,23 +2,253 @@
     <head>
         <link rel="stylesheet" href="/static/styles.css">
         <link rel="stylesheet" href="/static/stopwatch.css">
+        <link rel="stylesheet" href="/static/popup.css">
         <title>
             {{user}}'s stopwatch
         </title>
     </head>
     <body>
         <p id="stopwatch"><span id="stopwatch-text" style="color: #1fec1fb9;">0h 00m 00s</span><span id="centi-secs" style="color: #1fec1fb9">00</span></p>
-        <a href='#' onclick="event.stopPropagation(); addButton()" id="btn" style="display: none;">Send time to account >></a>
+        <a href='#' onclick="event.stopPropagation(); showSavePopup()" id="btn" style="display: none;">Send time to account >></a>
+        <div id="save-time-popup" class="popup" style="display:none">
+            <div class="popup-content">
+                <label for="category-select">Choose a category: </label>
+                <select id="category-select" onchange="loadSubcategories()">
+                    <option value="">-- Select a Category --</option>
+                </select>
+
+                <label for="subcategory-select">Choose a subcategory: </label>
+                <select id="subcategory-select" onchange="loadWatches()" disabled>
+                    <option value="">-- Select a Subcategory / Watch --</option>
+                </select>
+
+                <label for="watch-select">Choose a watch:</label>
+                <select id="watch-select" disabled>
+                    <option value="">-- Select a Watch --</option>
+                </select>
+                
+                <div class="button-container">
+                    <button onclick="hideSavePopup()" class="popup-btn red-btn">Cancel</button>
+                    <button onclick="showWatchPopup()" class="popup-btn blue-btn">New Watch</button>
+                    <button onclick="sendTime()" id="submit-btn" class="popup-btn green-btn" disabled>Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-watch-popup" class="popup" style="display:none">
+            <div class="popup-content">
+                <label for="category-create">Choose a category:</label>
+                <select id="category-create" onchange="loadSubcategories_p2(); validateNewWatch()">
+                    <option value="">-- Select a Category --</option>
+                </select>
+
+                <label for="subcategory-create">Choose a subcategory (optional):</label>
+                <select id="subcategory-create" disabled>
+                    <option value="">-- Select a Subcategory --</option>
+                </select>
+
+                <label for="watch-name">Choose a name:</label>
+                <input id="watch-name" type="text" placeholder="Enter watch name" oninput="validateNewWatch()" disabled/>
+                </select>
+                
+                <div class="button-container">
+                    <button onclick="hideWatchPopup()" class="popup-btn red-btn">Cancel</button>
+                    <button onclick="showWatchPopup()" class="popup-btn blue-btn">New Category</button>
+                    <button onclick="createWatch()" id="submit-btn-2" class="popup-btn green-btn" disabled>Save</button>
+                </div>
+            </div>
+        </div>
+
         <script>
             var running = false;
             var intervalId, startTime;
+            var elapsed_at_stop;
             var cs, s, m, h;
+            var hierarchyData;
+            var listen = true;
 
-            function addButton() {
+            async function showSavePopup() {
+                document.getElementById('save-time-popup').style.display = 'flex';
+                listen = false;
+                await loadCategories();
+            }
+
+            async function loadCategories() {
+                const resp = await fetch('/get-categories', { method: 'POST' });
                 
+                if (!resp.ok) {
+                    console.error('Failed to fetch categories!');
+                    return;
+                }
+
+                hierarchyData = await resp.json();
+                console.log(hierarchyData);
+
+                let catSelect = document.getElementById('category-select');
+                catSelect.innerHTML = '<option value="">-- Select a Category --</option>'
+                for (const [id, data] of Object.entries(hierarchyData)) {
+                    if (!data.parent) {
+                        let option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = data.name;
+                        catSelect.appendChild(option);
+                    }
+                }
+
+                document.getElementById('subcategory-select').disabled = true;
+                document.getElementById('watch-select').disabled = true;
+                document.getElementById('submit-btn').disabled = true;
+            }
+
+            function loadSubcategories() {
+                let catId = document.getElementById('category-select').value;
+                let subcatSelect = document.getElementById('subcategory-select');
+
+                subcatSelect.innerHTML = '<option value="">-- Select a Subcategory / Watch --</option>';
+                document.getElementById('watch-select').innerHTML = '<option value="">-- Select a Watch --</option>';
+                document.getElementById('watch-select').disabled = true;
+                document.getElementById('submit-btn').disabled = true;
+
+                if (!catId) {
+                    subcatSelect.disabled = true;
+                    return;
+                }
+
+                let cat = hierarchyData[catId];
+                for (const subId of cat.subcategories) {
+                    let data = hierarchyData[subId];
+                    let option = document.createElement('option');
+                    option.value = subId;
+                    option.textContent = data.name;
+                    subcatSelect.appendChild(option);
+                }
+
+                subcatSelect.disabled = false;
+            }
+
+            function loadWatches() {
+                let subcatId = document.getElementById('subcategory-select').value;
+                let watchSelect = document.getElementById('watch-select');
+
+                watchSelect.innerHTML = '<option value="">-- Select a Watch --</option>';
+                if (!subcatId) {
+                    watchSelect.disabled = true;
+                    return;
+                }
+
+                let subcat = hierarchyData[subcatId];
+                if (subcat.is_watch) {
+                    document.getElementById('submit-btn').disabled = false;
+                    return;
+                }
+
+                for (const subId of hierarchyData[subcatId]) {
+                    let data = hierarchyData[subId];
+                    let option = document.createElement('option');
+                    option.value = subId;
+                    option.textContent = data.name;
+                    watchSelect.appendChild(option);
+                }
+
+                watchSelect.disabled = false;
+            }
+
+            function hideSavePopup() {
+                document.getElementById('save-time-popup').style.display = 'none';
+                listen = true;
+            }
+
+            function showWatchPopup() {
+                hideSavePopup();
+                listen = false;
+
+                document.getElementById('create-watch-popup').style.display = 'flex';
+                document.getElementById('subcategory-create').disabled = true;
+                document.getElementById('watch-name').disabled = true;
+                document.getElementById('submit-btn-2').disabled = true;
+
+                // populate category-create
+                let dropdown = document.getElementById('category-create');
+                dropdown.innerHTML = '<option value="">-- Select a Category --</option>'
+
+                for (const [id, data] of Object.entries(hierarchyData)) {
+                    if (!data.parent) {
+                        let option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = data.name;
+                        document.getElementById('category-create').appendChild(option);
+                    }
+                }
+            }
+
+            function loadSubcategories_p2() {
+                let catId = document.getElementById('category-create').value;
+                
+                document.getElementById('subcategory-create').innerHTML = '<option value="">-- Select a Subcategory --</option>'
+                if (!catId) {
+                    document.getElementById('subcategory-create').disabled = true;
+                    document.getElementById('watch-name').disabled = true;
+                    document.getElementById('submit-btn-2').disabled = true;
+                    return;
+                }
+
+                let atleast_one_subcat = false;
+
+                for (const subId of hierarchyData[catId].subcategories) {
+                    if (!hierarchyData[subId].is_watch) {
+                        atleast_one_subcat = true;
+                        let option = document.createElement('option');
+                        option.value = subId;
+                        option.textContent = hierarchyData[subId].name;
+                        document.getElementById('subcategory-create').appendChild(option);
+                    }
+                }
+
+                document.getElementById('subcategory-create').disabled = !atleast_one_subcat;
+                document.getElementById('watch-name').disabled = false;
+            }
+
+            async function createWatch() {
+                let watchName = document.getElementById('watch-name').value.trim();
+                let catId = document.getElementById('category-create').value;
+                let subcatId = document.getElementById('subcategory-create').value || null;
+
+                if (!watchName || !catId) return;
+
+                let response = await fetch('/create-watch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: watchName,
+                        category_id: catId,
+                        subcategory_id: subcatId
+                    })
+                });
+
+                if (response.status == 409) {
+                    alert("Watch with this name already exists");
+                    return;
+                }
+
+                hideWatchPopup();
+            }
+
+            function validateNewWatch() {
+                let watchName = document.getElementById('watch-name').value.trim();
+                let categoryId = document.getElementById('category-create').value;
+                let createButton = document.getElementById('submit-btn-2');
+
+                createButton.disabled = !watchName || !categoryId;
+            }
+
+            function hideWatchPopup() {
+                document.getElementById('create-watch-popup').style.display = 'none';
+                showSavePopup();
             }
 
             function stop() {
+                elapsed_at_stop = Date.now() - startTime;
+
                 var elem = document.getElementById('btn');
                 elem.style = "display: flex;";
 
@@ -27,8 +257,6 @@
 
                 elem = document.getElementById('centi-secs');
                 elem.style = "color: #d90e0eb9;";
-
-                centi_secs = 0;
                 
                 running = false;
                 clearInterval(intervalId);
@@ -72,6 +300,8 @@
             }
 
             document.addEventListener('click', function() {
+                if (!listen) return;
+
                 if (running) { stop(); }
                 else { start(); }
             });
