@@ -1,4 +1,5 @@
-db
+db/users.db
+db/__pycache__
 proj
 sessions
 TODO

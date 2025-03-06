@@ -96,4 +96,30 @@ def create_watch():
     
     return "Success", 201
 
+@app.route('/create-category', method=['POST'])
+def create_category():
+    user_id = request.environ.get('beaker.session')['user_id']
+
+    data = request.json
+    cat_name = data.get('name').strip()
+    parent = data.get('parent')
+    parent = parent if parent != "null" else None
+
+    create = helper(user_id).create_category(parent, cat_name)
+
+    return "Success", 201
+
+@app.route('/save-time', method=['POST'])
+def save_time():
+    user_id = request.environ.get('beaker.session')['user_id']
+
+    data = request.json
+    watch_id = data.get('watch')
+    time = int(data.get('time'))
+
+    add_time = helper(user_id).add_time(watch_id, time)
+
+    if (add_time): return "Success", 201
+    return "Failed", 500
+
 run(session_app, host='localhost', port=8080, debug=True)
