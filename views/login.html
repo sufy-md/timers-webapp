@@ -8,6 +8,7 @@
     <body>
         <div class="authform">
             <p class="hidden-error" style="display: {{display}};">Invalid username or password.</p>
+            <a href="/signup" class="hidden-error" style="color: #4ab8f4">Don't have an account?</a>
             <form action="/login" method="post">
                 <input class="textfield" type="text" name="username" placeholder="Enter username" required>
                 <input class="textfield" type="password" name="password" placeholder="Enter password" required>

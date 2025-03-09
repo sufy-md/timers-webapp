@@ -10,6 +10,7 @@ os.environ['BEAKER_SESSION'] = '1'
 session_opts = {
     'session.type': 'file',
     'session.auto': True,
+    'session.cookie_expires': True,
     'session.data_dir': './sessions'
 }
 
@@ -18,7 +19,7 @@ session_app = SessionMiddleware(app, session_opts)
 
 @app.route('/')
 def hello():
-    return '''Hi'''
+    return redirect('/login')
 
 @app.route('/static/<file>')
 def serve_static(file):
@@ -26,6 +27,9 @@ def serve_static(file):
 
 @app.route('/signup', method=['POST', 'GET'])
 def signup():
+    if 'user' in request.environ.get('beaker.session'):
+        return redirect('/stopwatch')
+
     if request.method == 'POST':
         username = request.forms.get('username')
         password = request.forms.get('password')
@@ -34,17 +38,17 @@ def signup():
         if (not status):
             return template("signup.html", display='flex')
         
-        redirect('/login')
+        return redirect('/login')
 
     return template("signup.html", display='none')
 
 @app.route('/login', method=['POST', 'GET'])
 def login():
-    print("keys: ", request.environ.keys())
+    # print("keys: ", request.environ.keys())
     session = request.environ.get('beaker.session')
 
     if 'user' in session:
-        redirect('/stopwatch')
+        return redirect('/stopwatch')
 
     if request.method == 'POST':
         username = request.forms.get('username')
@@ -128,8 +132,16 @@ def dashboard():
         x = request.environ.get('beaker.session')
         user = x['user']
     except:
-        redirect('/login')
+        return redirect('/login')
     
     return template('dashboard.html', user=user)
+
+@app.route('/logout')
+def logout():
+    session = request.environ.get('beaker.session')
+    session.delete()
+    session.invalidate()
+
+    return redirect('/')
 
 run(session_app, host='localhost', port=8080, debug=True)

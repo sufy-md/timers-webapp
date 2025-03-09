@@ -20,11 +20,6 @@
     padding: 10px 20px;
 }
 
-a {
-    all : unset;
-    cursor : pointer;
-}
-
 #centi-secs {
     position: relative;
     bottom: 20px;
