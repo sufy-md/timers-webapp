@@ -122,4 +122,14 @@ def save_time():
     if (add_time): return "Success", 201
     return "Failed", 500
 
+@app.route('/dashboard')
+def dashboard():
+    try:
+        x = request.environ.get('beaker.session')
+        user, user_id = x['user'], x['user_id']
+    except:
+        redirect('/login')
+    
+    return template('dashboard.html', user=user)
+
 run(session_app, host='localhost', port=8080, debug=True)

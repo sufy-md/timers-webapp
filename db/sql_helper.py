@@ -46,19 +46,20 @@ class helper:
         self.cursor = self.conn.cursor()
     
     def fetch_categories(self) -> dict:
-        query = "SELECT id, name, parent_id, is_watch FROM categories WHERE user_id = ?"
+        query = "SELECT id, name, parent_id, is_watch, total_time FROM categories WHERE user_id = ?"
         self.cursor.execute(query, (self.user_id, ))
         entries = self.cursor.fetchall()
         self.conn.close()
 
         hierarchy = {}
         for entry in entries:
-            entry_id, name, parent, is_watch = entry
+            entry_id, name, parent, is_watch, total_time = entry
             hierarchy[entry_id] = {
                 "name": name,
                 "parent": parent,
                 "is_watch": bool(is_watch),
-                "subcategories": []
+                "subcategories": [],
+                "total_time": total_time
             }
         
         for entry_id, entry_data in hierarchy.items():
