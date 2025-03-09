@@ -290,7 +290,8 @@ async function hideCategoryPopup() {
     const resp = await fetch('/get-categories', { method: 'POST' });
     hierarchyData = await resp.json();
     document.getElementById('new-category-popup').style.display = 'none';
-    document.getElementById('create-watch-popup').style.display = 'flex';
+    // document.getElementById('create-watch-popup').style.display = 'flex';
+    showWatchPopup();
 }
 
 function stop() {
