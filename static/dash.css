@@ -1,0 +1,36 @@
+h1 {
+    width: 100%;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.category-table {
+    table-layout: fixed;
+    width: 60%;
+    border-collapse: collapse;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.category-table caption {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+th, td {
+    /* width: 30%; */
+    padding: 5px;
+    text-align: center;
+    align-items: center;
+    border-bottom: 1px solid #555;
+    font-size: 12px;
+}
+
+th {
+    font-size: 14px;
+    background: #222;
+    color: #fff;
+}

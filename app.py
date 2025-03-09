@@ -126,7 +126,7 @@ def save_time():
 def dashboard():
     try:
         x = request.environ.get('beaker.session')
-        user, user_id = x['user'], x['user_id']
+        user = x['user']
     except:
         redirect('/login')
     
