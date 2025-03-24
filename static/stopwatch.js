@@ -5,6 +5,79 @@ var cs, s, m, h;
 var hierarchyData;
 var listen = true;
 
+function option(value, textContent) {
+    let option = document.createElement('option');
+    option.value = value;
+    option.textContent = textContent;
+    return option;
+}
+
+async function refresh_hierarchy() {
+    const resp = await fetch('/get-categories', { method : 'POST' });
+    hierarchyData = await resp.json();
+    return true;
+}
+
+async function populatePopup(popup_id, depth, allow_watch, parent_element) {
+    await refresh_hierarchy();
+
+    popup = document.getElementById(popup_id);
+    display_text = "";
+
+    if (depth === 0) display_text = "-- Select a Category --";
+    else if (depth === 1 && allow_watch === 1) display_text = "-- Select a Subcategory / Watch --";
+    else if (depth === 1 && allow_watch === 0) display_text = "-- Select a Subcategory --";
+    else display_text = "-- Select a Watch --";
+
+    popup.innerHTML = "<option value=''>" + display_text + "</option>"
+
+    if (depth === 0) {
+        for (const [id, data] of Object.entries(hierarchyData)) {
+            if (!data.parent) {
+                let opt = option(id, data.name);
+                popup.appendChild(opt);
+            }
+        }
+        popup.disabled = false;
+        return;
+    }
+
+    // depth 1 or depth 2
+    parent_id = document.getElementById(parent_element).value;
+
+    if (!parent_id) {
+        popup.disabled = true;
+        return; // no valid parent found meaning this should be disabled
+    }
+
+    popup.disabled = false;
+
+    if (depth === 2) {
+        for (const watchId of hierarchyData[parent_id].subcategories) {
+            let opt = option(watchId, hierarchyData[watchId].name);
+            popup.appendChild(opt);
+        }
+
+        return;
+    }
+
+    // handling depth 1 now
+    for (const subId of hierarchyData[parent_id].subcategories) {
+        if (hierarchyData[subId].is_watch) continue;
+        let opt = option(subId, hierarchyData[subId].name);
+        popup.appendChild(opt);
+    }
+
+    if (!allow_watch) return; // done populating
+    // if watches allowed depth 1 still has more work to be done
+
+    for (const watchId of hierarchyData[parent_id].subcategories) {
+        if (!hierarchyData[watchId].is_watch) continue;
+        let opt = option(watchId, hierarchyData[watchId].name);
+        popup.appendChild(opt);
+    }
+}
+
 async function showSavePopup() {
     document.getElementById('save-time-popup').style.display = 'flex';
     listen = false;
@@ -12,83 +85,33 @@ async function showSavePopup() {
 }
 
 async function loadCategories() {
-    const resp = await fetch('/get-categories', { method: 'POST' });
-    
-    if (!resp.ok) {
-        console.error('Failed to fetch categories!');
-        return;
-    }
 
-    hierarchyData = await resp.json();
-    console.log(hierarchyData);
-
-    let catSelect = document.getElementById('category-select');
-    catSelect.innerHTML = '<option value="">-- Select a Category --</option>'
-    for (const [id, data] of Object.entries(hierarchyData)) {
-        if (!data.parent) {
-            let option = document.createElement('option');
-            option.value = id;
-            option.textContent = data.name;
-            catSelect.appendChild(option);
-        }
-    }
+    await populatePopup('category-select', 0, 0, null);
 
     document.getElementById('subcategory-select').disabled = true;
     document.getElementById('watch-select').disabled = true;
     document.getElementById('submit-btn').disabled = true;
+
 }
 
-function loadSubcategories() {
-    let catId = document.getElementById('category-select').value;
-    let subcatSelect = document.getElementById('subcategory-select');
+async function loadSubcategories() {
 
-    subcatSelect.innerHTML = '<option value="">-- Select a Subcategory / Watch --</option>';
+    await populatePopup('subcategory-select', 1, 1, 'category-select');
+
     document.getElementById('watch-select').innerHTML = '<option value="">-- Select a Watch --</option>';
     document.getElementById('watch-select').disabled = true;
     document.getElementById('submit-btn').disabled = true;
-
-    if (!catId) {
-        subcatSelect.disabled = true;
-        return;
-    }
-
-    let cat = hierarchyData[catId];
-    for (const subId of cat.subcategories) {
-        let data = hierarchyData[subId];
-        let option = document.createElement('option');
-        option.value = subId;
-        option.textContent = data.name;
-        subcatSelect.appendChild(option);
-    }
-
-    subcatSelect.disabled = false;
 }
 
-function loadWatches() {
+async function loadWatches() {
     let subcatId = document.getElementById('subcategory-select').value;
-    let watchSelect = document.getElementById('watch-select');
-
-    watchSelect.innerHTML = '<option value="">-- Select a Watch --</option>';
-    if (!subcatId) {
-        watchSelect.disabled = true;
-        return;
-    }
-
     let subcat = hierarchyData[subcatId];
     if (subcat.is_watch) {
         document.getElementById('submit-btn').disabled = false;
         return;
     }
 
-    for (const subId of hierarchyData[subcatId].subcategories) {
-        let data = hierarchyData[subId];
-        let option = document.createElement('option');
-        option.value = subId;
-        option.textContent = data.name;
-        watchSelect.appendChild(option);
-    }
-
-    watchSelect.disabled = false;
+    await populatePopup('watch-select', 2, 1, 'subcategory-select');
     document.getElementById('submit-btn').disabled = true;
 }
 
@@ -128,7 +151,7 @@ function hideSavePopup() {
     listen = true;
 }
 
-function showWatchPopup() {
+async function showWatchPopup() {
     hideSavePopup();
     listen = false;
 
@@ -138,23 +161,14 @@ function showWatchPopup() {
     document.getElementById('submit-btn-2').disabled = true;
 
     // populate category-create
-    let dropdown = document.getElementById('category-create');
-    dropdown.innerHTML = '<option value="">-- Select a Category --</option>'
-
-    for (const [id, data] of Object.entries(hierarchyData)) {
-        if (!data.parent) {
-            let option = document.createElement('option');
-            option.value = id;
-            option.textContent = data.name;
-            document.getElementById('category-create').appendChild(option);
-        }
-    }
+    await populatePopup('category-create', 0, 0, null);
 }
 
-function loadSubcategories_p2() {
+async function loadSubcategories_p2() {
     let catId = document.getElementById('category-create').value;
     
-    document.getElementById('subcategory-create').innerHTML = '<option value="">-- Select a Subcategory --</option>'
+    let def = '<option value="">-- Select a Subcategory --</option>';
+    document.getElementById('subcategory-create').innerHTML = def;
     if (!catId) {
         document.getElementById('subcategory-create').disabled = true;
         document.getElementById('watch-name').disabled = true;
@@ -162,19 +176,10 @@ function loadSubcategories_p2() {
         return;
     }
 
-    let atleast_one_subcat = false;
+    await populatePopup('subcategory-create', 1, 0, 'category-create');
+    let zero_subcat = document.getElementById('subcategory-create').innerHTML === def;
 
-    for (const subId of hierarchyData[catId].subcategories) {
-        if (!hierarchyData[subId].is_watch) {
-            atleast_one_subcat = true;
-            let option = document.createElement('option');
-            option.value = subId;
-            option.textContent = hierarchyData[subId].name;
-            document.getElementById('subcategory-create').appendChild(option);
-        }
-    }
-
-    document.getElementById('subcategory-create').disabled = !atleast_one_subcat;
+    document.getElementById('subcategory-create').disabled = zero_subcat;
     document.getElementById('watch-name').disabled = false;
 }
 
@@ -212,7 +217,6 @@ function validateNewWatch() {
 }
 
 function hideWatchPopup() {
-    // hierarchyData = await ( await fetch('/get-cateories', { method: 'POST' }) ).json();
     document.getElementById('create-watch-popup').style.display = 'none';
     showSavePopup();
 }
@@ -225,7 +229,7 @@ function showCategoryPopup() {
     dropdown.innerHTML = '<option value="null">No Parent</option>';
     
     for (const [id, data] of Object.entries(hierarchyData)) {
-        if (!data.parent && data.name !== 'Uncategorised') {
+        if (!data.parent && data.name !== 'Uncategorised') { // handling this one manually
             let option = document.createElement('option');
             option.value = id;
             option.textContent = data.name;
@@ -244,7 +248,7 @@ function validateNewCat() {
         return;
     }
 
-    if (parent === "null") { // check 0-level categories with same name
+    if (parent === "null" || !parent) { // check 0-level categories with same name
         for (const [id, data] of Object.entries(hierarchyData)) {
             if (data.parent === null && data.name === name) {
                 btn.disabled = true;
@@ -287,10 +291,8 @@ async function createCategory() {
 }
 
 async function hideCategoryPopup() {
-    const resp = await fetch('/get-categories', { method: 'POST' });
-    hierarchyData = await resp.json();
+    await refresh_hierarchy();
     document.getElementById('new-category-popup').style.display = 'none';
-    // document.getElementById('create-watch-popup').style.display = 'flex';
     showWatchPopup();
 }
 
