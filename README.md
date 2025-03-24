@@ -10,7 +10,7 @@ A simple stopwatch-based time tracker that allows users to log time into custom 
 - **Data Persistence** with SQLite
 
 ## Setup
-1. Clone the repo:
+1. Clone the repo
     ```bash
     git clone https://www.github.com/sufy-md/timers-webapp.git
     cd timers-webapp
