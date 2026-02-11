@@ -70,8 +70,16 @@ class helper:
         return hierarchy
     
     def create_watch(self, parent, name):
-        query = "SELECT * FROM categories WHERE user_id=? AND (parent_id IS ? OR parent_id = ?) AND name=?"
-        self.cursor.execute(query, (self.user_id, parent, parent, name))
+        # query = "SELECT * FROM categories WHERE user_id=? AND (parent_id IS ? OR parent_id = ?) AND name=?"
+        # self.cursor.execute(query, (self.user_id, parent, parent, name))
+
+        if parent is None:
+            query = "SELECT * FROM categories WHERE user_id=? AND parent_id IS NULL AND name=?"
+            self.cursor.execute(query, (self.user_id, name))
+        else:
+            query = "SELECT * FROM categories WHERE user_id=? AND parent_id=? AND name=?"
+            self.cursor.execute(query, (self.user_id, parent, name))
+
         if self.cursor.fetchone():
             self.conn.close()
             return 0
