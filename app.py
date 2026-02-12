@@ -66,6 +66,16 @@ def hello():
 def serve_static(file):
     return static_file(file, root='./static')
 
+@app.route('/toggle-bg', method=['POST'])
+def toggle_bg():
+    session = request.environ.get('beaker.session')
+    new_bg = random.choice(BACKGROUNDS)
+    while new_bg == session.get('background'):
+        new_bg = random.choice(BACKGROUNDS)
+    session['background'] = new_bg
+    session.save()
+    return {"background": new_bg}
+        
 # @app.route('/signup', method=['POST', 'GET'])
 # def signup():
 #     if 'user' in request.environ.get('beaker.session'):

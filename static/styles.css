@@ -90,8 +90,16 @@ a {
     transition: opacity 0.5s ease;
 }
 
+.wally-button {
+    position: fixed;
+    top: 0px;
+    left: 10px;
+    transition: opacity 0.5s ease;
+}
+
 .nav-link.inactive,
-.logout.inactive {
+.logout.inactive,
+.wally-button.inactive {
     pointer-events: none;
     opacity: 0;
     cursor: default;

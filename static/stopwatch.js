@@ -5,41 +5,6 @@ var cs, s, m, h;
 var hierarchyData;
 var listen = true;
 
-function setRandomBg() {
-    const bgs = [
-        "https://images.unsplash.com/photo-1693925648059-431bc27aa059?q=80&w=6240&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1692784558638-f3a38bbb21d9?q=80&w=3024&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1742943892614-dfe67381c341?q=80&w=7440&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1504253492562-cbc4dc540fcb?q=80&w=3000&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1759298928528-68604ad099f5?q=80&w=7008&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1729932989171-c5c1a0bdc86d?q=80&w=2746&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1603950227760-e609ce8e15b4?q=80&w=3000&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1472173148041-00294f0814a2?q=80&w=5713&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1503332132010-d1b77a049ddd?q=80&w=4858&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1622254835298-bc94b943bbd4?q=80&w=4298&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=4592&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1516797045820-6edca89b2830?q=80&w=2448&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop"
-    ];
-
-    const randomIndex = Math.floor(Math.random() * bgs.length);
-    document.body.style.backgroundImage = `url(${bgs[randomIndex]})`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundRepeat = "no-repeat";
-    return;
-}
-
-// Use session background if available, otherwise pick random
-if (window.sessionBackground) {
-    document.body.style.backgroundImage = `url(${window.sessionBackground})`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundRepeat = "no-repeat";
-} else {
-    setRandomBg();
-}
-
 function option(value, textContent) {
     let option = document.createElement('option');
     option.value = value;
@@ -392,6 +357,13 @@ function start() {
     
     running = true;
     intervalId = setInterval(updater, 10);
+}
+
+async function togglebg() {
+    let newBg = await fetch('/toggle-bg', { method: 'POST' });
+    let data = await newBg.json();
+    newBg = data['background'];
+    document.body.style.backgroundImage = `url('${newBg}')`;
 }
 
 document.addEventListener('click', function() {
