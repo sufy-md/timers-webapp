@@ -5,10 +5,10 @@
             Sign Up
         </title>
     </head>
-    <body>
+    <body style="background-image: url('{{background}}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
         <div class="authform">
             <p class="hidden-error" style="display: {{display}};">Username already exists.</p>
-            <a href="/login" class="hidden-error" style="color: #4ab8f4">Have an account?</a>
+            <a href="/login" class="hidden-error" style="color: white; text-shadow: 0 0 1px #0a2124;">Have an account?</a>
             <form action="/signup" method="post">
                 <input class="textfield" type="text" name="username" placeholder="Pick a username" required>
                 <input class="textfield" type="password" name="password" placeholder="Pick a password" required>

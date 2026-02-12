@@ -1,10 +1,33 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.5) !important;
+}
+
 #stopwatch {
-    font-family: Futura;
-    font-size: 96px;
     margin: auto;
     height: 55%;
     display: flex;
     justify-content: center;
+}
+
+#stopwatch-text {
+    font-size: 96px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    color: white;
+    transition: text-shadow 0.2s ease-in-out;
+}
+
+#stopwatch-text.glow-idle {
+    text-shadow: 0 0 10px rgba(0, 100, 255, 0.7);
+}
+
+#stopwatch-text.glow-running {
+    text-shadow: 0 0 10px rgba(46, 204, 46, 0.8);
+}
+
+#stopwatch-text.glow-stopped {
+    text-shadow: 0 0 10px rgba(255, 70, 70, 0.8);
 }
 
 #stopwatch span {
@@ -18,12 +41,26 @@
     margin-top: 30px;
     font-size: 20px;
     padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.num {
+    width: 1ch;
+    font-variant-numeric: tabular-nums;
+    color: #ffffff;
+}
+
+.unit {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.5em;
+    margin-right: 15px;
+    font-weight: 300;
 }
 
 #centi-secs {
+    color: rgba(255, 255, 255, 0.4);
     position: relative;
     bottom: 20px;
     left: 5px;
-    font-family: Verdana;
     font-size: 24px;
 }

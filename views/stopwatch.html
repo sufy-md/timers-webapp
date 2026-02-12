@@ -8,8 +8,9 @@
         </title>
     </head>
     <body>
-        <a class="logout" href="logout">Logout</a>
-        <p id="stopwatch"><span id="stopwatch-text" style="color: #1fec1fb9;">0h 00m 00s</span><span id="centi-secs" style="color: #1fec1fb9">00</span></p>
+        <a class="nav-link" id="dashboard-link" href="/dashboard">Dashboard</a>
+        <a class="logout" href="/logout">Logout</a>
+        <p id="stopwatch"><span class="glow-idle" id="stopwatch-text">0<span class="unit">h</span> 00<span class="unit">m</span> 00<span class="unit">s</span></span><span id="centi-secs">00</span></p>
         <a href='#' onclick="event.stopPropagation(); showSavePopup()" id="btn" style="display: none;">Send time to account >></a>
         <div id="save-time-popup" class="popup" style="display:none">
             <div class="popup-content">
@@ -75,6 +76,9 @@
                 </div>
             </div>
         </div>
+        <script>
+            window.sessionBackground = "{{background}}";
+        </script>
         <script src="/static/stopwatch.js" defer></script>
     </body>
 </html>

@@ -5,10 +5,10 @@
             Login
         </title>
     </head>
-    <body>
+    <body style="background-image: url('{{background}}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
         <div class="authform">
             <p class="hidden-error" style="display: {{display}};">Invalid username or password.</p>
-            <a href="/signup" class="hidden-error" style="color: #4ab8f4">Don't have an account?</a>
+            <a href="/signup" class="hidden-error" style="color: white; text-shadow: 0 0 1px #0a2124;">Don't have an account?</a>
             <form action="/login" method="post">
                 <input class="textfield" type="text" name="username" placeholder="Enter username" required>
                 <input class="textfield" type="password" name="password" placeholder="Enter password" required>

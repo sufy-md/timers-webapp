@@ -5,6 +5,41 @@ var cs, s, m, h;
 var hierarchyData;
 var listen = true;
 
+function setRandomBg() {
+    const bgs = [
+        "https://images.unsplash.com/photo-1693925648059-431bc27aa059?q=80&w=6240&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1692784558638-f3a38bbb21d9?q=80&w=3024&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1742943892614-dfe67381c341?q=80&w=7440&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1504253492562-cbc4dc540fcb?q=80&w=3000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1759298928528-68604ad099f5?q=80&w=7008&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1729932989171-c5c1a0bdc86d?q=80&w=2746&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1603950227760-e609ce8e15b4?q=80&w=3000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1472173148041-00294f0814a2?q=80&w=5713&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1503332132010-d1b77a049ddd?q=80&w=4858&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1622254835298-bc94b943bbd4?q=80&w=4298&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=4592&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1516797045820-6edca89b2830?q=80&w=2448&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop"
+    ];
+
+    const randomIndex = Math.floor(Math.random() * bgs.length);
+    document.body.style.backgroundImage = `url(${bgs[randomIndex]})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+    return;
+}
+
+// Use session background if available, otherwise pick random
+if (window.sessionBackground) {
+    document.body.style.backgroundImage = `url(${window.sessionBackground})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+} else {
+    setRandomBg();
+}
+
 function option(value, textContent) {
     let option = document.createElement('option');
     option.value = value;
@@ -300,13 +335,20 @@ function stop() {
     elapsed_at_stop = Date.now() - startTime;
 
     var elem = document.getElementById('btn');
-    elem.style = "display: flex;";
+    elem.style.display = "flex";
 
-    var elem = document.getElementById('stopwatch-text');
-    elem.style = "color: #d90e0eb9;";
+    var text = document.getElementById('stopwatch-text');
+    text.classList.remove('glow-idle', 'glow-running');
+    text.classList.add('glow-stopped');
 
-    elem = document.getElementById('centi-secs');
-    elem.style = "color: #d90e0eb9;";
+    var centiSecs = document.getElementById('centi-secs');
+    centiSecs.style.opacity = "0.5";
+    
+    // Re-enable navigation links
+    var dashLink = document.getElementById('dashboard-link');
+    var logoutLink = document.querySelector('.logout');
+    if (dashLink) dashLink.classList.remove('inactive');
+    if (logoutLink) logoutLink.classList.remove('inactive');
     
     running = false;
     clearInterval(intervalId);
@@ -316,22 +358,35 @@ function start() {
     startTime = Date.now();
 
     var elem = document.getElementById('btn');
-    elem.style = "display: none;";
+    elem.style.display = "none";
 
-    var elem = document.getElementById('stopwatch-text');
-    elem.style = "color: #1fec1fb9;";
+    var text = document.getElementById('stopwatch-text');
+    text.classList.remove('glow-idle', 'glow-stopped');
+    text.classList.add('glow-running');
 
-    var elem2 = document.getElementById('centi-secs');
-    elem2.style = "color: #1fec1fb9;";
-
+    var centiSecs = document.getElementById('centi-secs');
+    centiSecs.style.opacity = "0.8";
+    
+    // Disable navigation links
+    var dashLink = document.getElementById('dashboard-link');
+    var logoutLink = document.querySelector('.logout');
+    if (dashLink) dashLink.classList.add('inactive');
+    if (logoutLink) logoutLink.classList.add('inactive');
+    
     function updater() {
         elapsed = Date.now() - startTime;
         cs = Math.floor(elapsed / 10) % 100;
         s = Math.floor(elapsed / 1000) % 60;
         m = Math.floor(elapsed / 60000) % 60;
         h = Math.floor(elapsed / 3600000);
-
-        document.getElementById('stopwatch-text').innerHTML = `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+        
+        const timeHTML = `
+        <span class="num">${h}</span><span class="unit">h</span>
+        <span class="num">${m.toString().padStart(2, '0')}</span><span class="unit">m</span>
+        <span class="num">${s.toString().padStart(2, '0')}</span><span class="unit">s</span>
+        `;
+        
+        document.getElementById('stopwatch-text').innerHTML = timeHTML;
         document.getElementById('centi-secs').innerHTML = Math.floor(cs / 10) + "" + (cs % 10);
     }
     

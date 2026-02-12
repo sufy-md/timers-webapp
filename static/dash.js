@@ -8,9 +8,14 @@ async function wrapper() {
     main();
 }
 
-document.addEventListener("DOMContentLoaded", wrapper());
+document.addEventListener("DOMContentLoaded", wrapper);
 
 function main() {
+    if (Object.keys(hierarchyData).length === 0) {
+        document.body.innerHTML = "<p> No watches found. Go track some time! </p>";
+        return;
+    }
+
     let categories = Object.fromEntries(
         Object.entries(hierarchyData).filter(([id, data]) => !data.parent)
     );
@@ -58,8 +63,8 @@ function createTableRow(catId, subcatName, watchId) {
     if (!subcatName) subcatName = '';
     else subcatName += '/';
 
-    watchName = hierarchyData[watchId].name;
-    displayTime = format(hierarchyData[watchId].total_time);
+    let watchName = hierarchyData[watchId].name;
+    let displayTime = format(hierarchyData[watchId].total_time);
 
     let tr = document.createElement('tr');
 
