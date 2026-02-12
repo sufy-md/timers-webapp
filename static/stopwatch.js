@@ -311,9 +311,10 @@ function stop() {
     
     // Re-enable navigation links
     var dashLink = document.getElementById('dashboard-link');
-    var logoutLink = document.querySelector('.logout');
     if (dashLink) dashLink.classList.remove('inactive');
-    if (logoutLink) logoutLink.classList.remove('inactive');
+
+    var bgSwitchLink = document.querySelector('.wally-button');
+    if (bgSwitchLink) bgSwitchLink.classList.remove('inactive');
     
     running = false;
     clearInterval(intervalId);
@@ -334,9 +335,10 @@ function start() {
     
     // Disable navigation links
     var dashLink = document.getElementById('dashboard-link');
-    // var logoutLink = document.querySelector('.logout');
     if (dashLink) dashLink.classList.add('inactive');
-    // if (logoutLink) logoutLink.classList.add('inactive');
+
+    var bgSwitchLink = document.querySelector('.wally-button');
+    if (bgSwitchLink) bgSwitchLink.classList.add('inactive');
     
     function updater() {
         elapsed = Date.now() - startTime;
