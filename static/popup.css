@@ -29,6 +29,20 @@
     align-items: center;
 }
 
+.popup-content label {
+    display: block;
+    text-align: left;
+    width: 80%;
+    margin: 15px auto 5px auto;
+
+    font-family: 'Futura', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+
 select {
     padding: 8px;
     margin: 10px 0;
@@ -37,16 +51,30 @@ select {
 }
 
 select, input {
+    width: 80%;
+    margin: 0 auto;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     border-radius: 8px;
-    padding: 10px;
+    padding: 12px 15px;
+    font-size: 14px;
+    outline: none;
 }
 
 select:hover, input:hover {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.05);
     border-color: rgba(255, 255, 255, 0.4);
+}
+
+select:focus, input:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: #2ecc2e;
+    box-shadow: 0 0 10px rgba(46, 204, 46, 0.2);
+}
+
+option {
+    background: #1e1e1e;
 }
 
 select:disabled{
@@ -55,10 +83,21 @@ select:disabled{
 }
 
 .button-container {
-    margin-top: 15px;
+    margin-top: 25px;
     display: flex;
-    width: 100%;
-    justify-content: space-evenly;
+    width: 80%;
+    justify-content: space-between;
+}
+
+.popup-btn {
+    flex: 1; /* Make them equal width */
+    padding: 10px 0;
+    border-radius: 8px; /* Match input radius */
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: bold;
+    border: 1px solid transparent; /* Prepare for border transition */
 }
 
 button {
@@ -70,15 +109,16 @@ button {
     border: none;
     font-size: 14px;
     cursor: pointer;
-    /* transition: background 0.3s ease; */
+    transition: background 0.3s ease;
     color: #ffffff;
-    /* flex: 1; */
-    /* margin: 0 2px; */
+    flex: 1;
+    margin: 0 10px;
 }
 
 .green-btn {
-    background: linear-gradient(135deg, #2ecc2e 0%, #209620 100%);
-    box-shadow: 0 4px 15px rgba(46, 204, 46, 0.3);
+    background: rgba(46, 204, 46, 0.2);
+    border: 1px solid rgba(46, 204, 46, 0.5);
+    color: #4eff4e;
 }
 
 .green-btn:disabled {
@@ -86,12 +126,29 @@ button {
     cursor: not-allowed;
 }
 
-.red-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 70, 70, 0.5);
+.green-btn:hover:not(:disabled) {
+    background: rgba(46, 204, 46, 0.4);
+    box-shadow: 0 0 15px rgba(46, 204, 46, 0.3);
 }
+
+.red-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 70, 70, 0.3);
+    color: rgba(255, 70, 70, 0.8);
+}
+.red-btn:hover {
+    border-color: rgba(255, 70, 70, 0.8);
+    background: rgba(255, 70, 70, 0.1);
+}
+
 .blue-btn {
-    background: #2e2ecc;
+    background: rgba(74, 184, 244, 0.2);
+    border: 1px solid rgba(74, 184, 244, 0.5);
+    color: #4ab8f4;
+}
+.blue-btn:hover {
+    background: rgba(74, 184, 244, 0.4);
+    box-shadow: 0 0 15px rgba(74, 184, 244, 0.3);
 }
 
 button:hover {

@@ -27,12 +27,18 @@ function setRandomBg() {
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
-
-    document.body.style.boxShadow = "inset 0 0 0 100% rgba(0, 0, 0, 0.5)";
     return;
 }
 
-setRandomBg();
+// Use session background if available, otherwise pick random
+if (window.sessionBackground) {
+    document.body.style.backgroundImage = `url(${window.sessionBackground})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+} else {
+    setRandomBg();
+}
 
 function option(value, textContent) {
     let option = document.createElement('option');
@@ -338,6 +344,12 @@ function stop() {
     var centiSecs = document.getElementById('centi-secs');
     centiSecs.style.opacity = "0.5";
     
+    // Re-enable navigation links
+    var dashLink = document.getElementById('dashboard-link');
+    var logoutLink = document.querySelector('.logout');
+    if (dashLink) dashLink.classList.remove('inactive');
+    if (logoutLink) logoutLink.classList.remove('inactive');
+    
     running = false;
     clearInterval(intervalId);
 }
@@ -354,6 +366,12 @@ function start() {
 
     var centiSecs = document.getElementById('centi-secs');
     centiSecs.style.opacity = "0.8";
+    
+    // Disable navigation links
+    var dashLink = document.getElementById('dashboard-link');
+    var logoutLink = document.querySelector('.logout');
+    if (dashLink) dashLink.classList.add('inactive');
+    if (logoutLink) logoutLink.classList.add('inactive');
     
     function updater() {
         elapsed = Date.now() - startTime;
