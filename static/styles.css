@@ -76,17 +76,17 @@ a {
     cursor : pointer;
 }
 
-.logout {
+/* .logout {
     position: fixed;
     top: 0px;
     right: 10px;
     transition: opacity 0.5s ease;
-}
+} */
 
 .nav-link {
     position: fixed;
     top: 0px;
-    right: 80px;
+    right: 10px;
     transition: opacity 0.5s ease;
 }
 

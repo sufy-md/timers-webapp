@@ -369,9 +369,9 @@ function start() {
     
     // Disable navigation links
     var dashLink = document.getElementById('dashboard-link');
-    var logoutLink = document.querySelector('.logout');
+    // var logoutLink = document.querySelector('.logout');
     if (dashLink) dashLink.classList.add('inactive');
-    if (logoutLink) logoutLink.classList.add('inactive');
+    // if (logoutLink) logoutLink.classList.add('inactive');
     
     function updater() {
         elapsed = Date.now() - startTime;

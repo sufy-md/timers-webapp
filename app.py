@@ -14,6 +14,17 @@ def read_config():
         USER_ = config.get('user')
         if USER_: USER = USER_
 read_config()
+if not USER:
+    USER = random.choice([
+        "Batman",
+        "Ryan Gosling",
+        "The Entity",
+        "DaBaby",
+        "Michael Scott",
+        "set up a user in config.json to disable this",
+        "Cookie Monster",
+        "Gregory House"
+    ])
 
 BACKGROUNDS = [
     "https://images.unsplash.com/photo-1693925648059-431bc27aa059?q=80&w=6240&auto=format&fit=crop",
