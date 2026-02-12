@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", wrapper);
 
 function main() {
     if (Object.keys(hierarchyData).length === 0) {
-        document.body.innerHTML = "<p> No watches found. Go track some time! </p>";
+        document.body.innerHTML = "<p class='no-watches'> No watches found. Go track some time! </p>";
         return;
     }
 
