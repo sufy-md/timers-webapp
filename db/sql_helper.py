@@ -1,53 +1,18 @@
-import bcrypt
 import sqlite3
 
-DATABASE = 'db/users.db'
+DATABASE = 'db/user.db'
 
 def __init__():
     return
 
-class auth_helper:
-    def __init__(self, username : str, password : str) -> None:
-        self.username = username
-        self.password = password
-
-        self.conn = sqlite3.connect(DATABASE)
-        self.cursor = self.conn.cursor()
-    
-    def signup(self):
-        self.cursor.execute("SELECT id FROM users WHERE username = ?", (self.username, ))
-        if self.cursor.fetchone():
-            self.conn.close()
-            return False
-        
-        hashed_pw = bcrypt.hashpw(self.password.encode(), bcrypt.gensalt()).decode()
-        self.cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (self.username, hashed_pw))
-        id = self.cursor.execute("SELECT id FROM users WHERE username = ?", (self.username, )).fetchone()[0]
-        self.cursor.execute("INSERT INTO categories (user_id, name) VALUES (?, ?)", (id, 'Uncategorised'))
-
-        self.conn.commit()
-        self.conn.close()
-
-        return True
-    
-    def login(self):
-        self.cursor.execute("SELECT id, password FROM users WHERE username = ?", (self.username, ))
-        user = self.cursor.fetchone()
-        self.conn.close()
-
-        if (user and bcrypt.checkpw(self.password.encode(), user[1].encode())): return user[0]
-        return 0
-
 class helper:
-    def __init__(self, user_id):
-        self.user_id = user_id
-
+    def __init__(self):
         self.conn = sqlite3.connect(DATABASE)
         self.cursor = self.conn.cursor()
     
     def fetch_categories(self) -> dict:
-        query = "SELECT id, name, parent_id, is_watch, total_time FROM categories WHERE user_id = ?"
-        self.cursor.execute(query, (self.user_id, ))
+        query = "SELECT id, name, parent_id, is_watch, total_time FROM categories"
+        self.cursor.execute(query)
         entries = self.cursor.fetchall()
         self.conn.close()
 
@@ -74,18 +39,18 @@ class helper:
         # self.cursor.execute(query, (self.user_id, parent, parent, name))
 
         if parent is None:
-            query = "SELECT * FROM categories WHERE user_id=? AND parent_id IS NULL AND name=?"
-            self.cursor.execute(query, (self.user_id, name))
+            query = "SELECT * FROM categories WHERE parent_id IS NULL AND name=?"
+            self.cursor.execute(query, (name,))
         else:
-            query = "SELECT * FROM categories WHERE user_id=? AND parent_id=? AND name=?"
-            self.cursor.execute(query, (self.user_id, parent, name))
+            query = "SELECT * FROM categories WHERE parent_id=? AND name=?"
+            self.cursor.execute(query, (parent, name))
 
         if self.cursor.fetchone():
             self.conn.close()
             return 0
 
-        query = "INSERT INTO categories (user_id, name, parent_id, is_watch) VALUES (?, ?, ?, ?)"
-        self.cursor.execute(query, (self.user_id, name, parent, 1))
+        query = "INSERT INTO categories (name, parent_id, is_watch) VALUES (?, ?, ?)"
+        self.cursor.execute(query, (name, parent, 1))
 
         self.conn.commit()
         self.conn.close()
@@ -93,16 +58,16 @@ class helper:
         return 1
     
     def create_category(self, parent, name):
-        query = "INSERT INTO categories (user_id, name, parent_id) VALUES (?, ?, ?)"
-        self.cursor.execute(query, (self.user_id, name, parent))
+        query = "INSERT INTO categories (name, parent_id) VALUES (?, ?)"
+        self.cursor.execute(query, (name, parent))
         self.conn.commit()
         self.conn.close()
 
         return 1
     
     def add_time(self, watch_id, time):
-        query = "SELECT total_time FROM categories WHERE user_id=? AND id=?"
-        self.cursor.execute(query, (self.user_id, watch_id))
+        query = "SELECT total_time FROM categories WHERE id=?"
+        self.cursor.execute(query, (watch_id,))
         t = self.cursor.fetchone()
         if (not t):
             self.conn.close()
