@@ -3,7 +3,7 @@ var hierarchyData;
 async function wrapper() {
     const resp = await fetch('/get-categories', { method : 'POST' });
     hierarchyData = await resp.json();
-    console.log(hierarchyData);
+    // console.log(hierarchyData);
 
     main();
 }
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", wrapper);
 
 function main() {
     if (Object.keys(hierarchyData).length === 0) {
-        document.body.innerHTML = "<p> No watches found. Go track some time! </p>";
+        document.body.innerHTML += "<p class='no-watches'> No watches found. Go track some time! </p>";
         return;
     }
 
@@ -102,4 +102,11 @@ function format(timeInSecs) {
     string += Math.floor(seconds / 10) + '' + (seconds % 10) + 's';
 
     return string;
+}
+
+async function togglebg() {
+    let newBg = await fetch('/toggle-bg', { method: 'POST' });
+    let data = await newBg.json();
+    newBg = data['background'];
+    document.body.style.backgroundImage = `url('${newBg}')`;
 }
