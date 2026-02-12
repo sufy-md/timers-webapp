@@ -1,10 +1,32 @@
 from bottle import Bottle, redirect, request, response, run, static_file, template
 from beaker.middleware import SessionMiddleware
-from db.sql_helper import auth_helper, helper
+from db.sql_helper import helper
 
 import json
 import os
 import random
+
+USER = None
+def read_config():
+    global USER
+    if not os.path.exists('config.json'):
+        return
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+        USER_ = config.get('user')
+        if USER_: USER = USER_
+read_config()
+if not USER:
+    USER = random.choice([
+        "Batman",
+        "Ryan Gosling",
+        "The Entity",
+        "DaBaby",
+        "Michael Scott",
+        "set up a user in config.json to disable this",
+        "Cookie Monster",
+        "Gregory House"
+    ])
 
 BACKGROUNDS = [
     "https://images.unsplash.com/photo-1693925648059-431bc27aa059?q=80&w=6240&auto=format&fit=crop",
@@ -29,7 +51,7 @@ BACKGROUNDS = [
     "https://images.unsplash.com/photo-1503435824048-a799a3a84bf7?q=80&w=3840&auto=format&fit=crop"
 ]
 
-LOGIN_BACKGROUND = "https://images.unsplash.com/photo-1619441207978-3d326c46e2c9?q=80&w=6853&auto=format&fit=crop"
+# LOGIN_BACKGROUND = "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop"
 
 os.environ['BEAKER_SESSION'] = '1'
 
@@ -45,79 +67,89 @@ session_app = SessionMiddleware(app, session_opts)
 
 @app.route('/')
 def hello():
-    return redirect('/login')
+    return redirect('/stopwatch')
 
 @app.route('/static/<file>')
 def serve_static(file):
     return static_file(file, root='./static')
 
-@app.route('/signup', method=['POST', 'GET'])
-def signup():
-    if 'user' in request.environ.get('beaker.session'):
-        return redirect('/stopwatch')
-
-    if request.method == 'POST':
-        username = request.forms.get('username')
-        password = request.forms.get('password')
-
-        status = auth_helper(username, password).signup()
-        if (not status):
-            return template("signup.html", display='flex', background=LOGIN_BACKGROUND)
-        
-        return redirect('/login')
-
-    return template("signup.html", display='none', background=LOGIN_BACKGROUND)
-
-@app.route('/login', method=['POST', 'GET'])
-def login():
-    # print("keys: ", request.environ.keys())
+@app.route('/toggle-bg', method=['POST'])
+def toggle_bg():
     session = request.environ.get('beaker.session')
-
-    if 'user' in session:
-        return redirect('/stopwatch')
-
-    if request.method == 'POST':
-        username = request.forms.get('username')
-        password = request.forms.get('password')
-
-        status = auth_helper(username, password).login()
-        if (not status):
-            return template("login.html", display='flex', background=LOGIN_BACKGROUND)
+    new_bg = random.choice(BACKGROUNDS)
+    while new_bg == session.get('background'):
+        new_bg = random.choice(BACKGROUNDS)
+    session['background'] = new_bg
+    session.save()
+    return {"background": new_bg}
         
-        session['user'] = username
-        session['user_id'] = status
-        session['background'] = random.choice(BACKGROUNDS)
-        session.save()
-        return redirect('/stopwatch')
+# @app.route('/signup', method=['POST', 'GET'])
+# def signup():
+#     if 'user' in request.environ.get('beaker.session'):
+#         return redirect('/stopwatch')
 
-    return template("login.html", display='none', background=LOGIN_BACKGROUND)
+#     if request.method == 'POST':
+#         username = request.forms.get('username')
+#         password = request.forms.get('password')
+
+#         status = auth_helper(username, password).signup()
+#         if (not status):
+#             return template("signup.html", display='flex', background=LOGIN_BACKGROUND)
+        
+#         return redirect('/login')
+
+#     return template("signup.html", display='none', background=LOGIN_BACKGROUND)
+
+# @app.route('/login', method=['POST', 'GET'])
+# def login():
+#     # print("keys: ", request.environ.keys())
+#     session = request.environ.get('beaker.session')
+
+#     if 'user' in session:
+#         return redirect('/stopwatch')
+
+#     if request.method == 'POST':
+#         username = request.forms.get('username')
+#         password = request.forms.get('password')
+
+#         status = auth_helper(username, password).login()
+#         if (not status):
+#             return template("login.html", display='flex', background=LOGIN_BACKGROUND)
+        
+#         session['user'] = username
+#         session['user_id'] = status
+#         session['background'] = random.choice(BACKGROUNDS)
+#         session.save()
+#         return redirect('/stopwatch')
+
+#     return template("login.html", display='none', background=LOGIN_BACKGROUND)
 
 @app.route('/stopwatch')
 def stopwatch():
     session = request.environ.get('beaker.session')
-    if not session or 'user' not in session:
-        return redirect('/login')
+    # if not session or 'user' not in session:
+    #     return redirect('/login')
     
     # Ensure background is set (for old sessions)
     if 'background' not in session:
         session['background'] = random.choice(BACKGROUNDS)
         session.save()
     
-    return template('stopwatch.html', user=session['user'], background=session['background'])
+    return template('stopwatch.html', user=USER, background=session['background'])
 
 @app.route('/get-categories', method=['POST'])
 def get_categories():
     session = request.environ.get('beaker.session')
-    user_id = session['user_id']
+    # user_id = session['user_id']
 
-    categories = helper(user_id).fetch_categories()
+    categories = helper().fetch_categories()
     response.content_type = 'application/json'
     return json.dumps(categories)
 
 @app.route('/create-watch', method=['POST'])
 def create_watch():
     session = request.environ.get('beaker.session')
-    user_id = session['user_id']
+    # user_id = session['user_id']
 
     data = request.json
     watch_name = data.get('name').strip()
@@ -125,7 +157,7 @@ def create_watch():
     subcat = data.get('subcategory_id') or None
 
     parent_id = subcat if subcat else cat
-    create = helper(user_id).create_watch(parent_id, watch_name)
+    create = helper().create_watch(parent_id, watch_name)
 
     if (not create):
         response.status = 409
@@ -136,27 +168,27 @@ def create_watch():
 
 @app.route('/create-category', method=['POST'])
 def create_category():
-    user_id = request.environ.get('beaker.session')['user_id']
+    # user_id = request.environ.get('beaker.session')['user_id']
 
     data = request.json
     cat_name = data.get('name').strip()
     parent = data.get('parent')
     parent = parent if parent != "null" else None
 
-    create = helper(user_id).create_category(parent, cat_name)
+    create = helper().create_category(parent, cat_name)
 
     response.status = 201
     return "Success"
 
 @app.route('/save-time', method=['POST'])
 def save_time():
-    user_id = request.environ.get('beaker.session')['user_id']
+    # user_id = request.environ.get('beaker.session')['user_id']
 
     data = request.json
     watch_id = data.get('watch')
     time = int(data.get('time'))
 
-    add_time = helper(user_id).add_time(watch_id, time)
+    add_time = helper().add_time(watch_id, time)
 
     if (add_time):
         response.status = 201
@@ -168,22 +200,22 @@ def save_time():
 @app.route('/dashboard')
 def dashboard():
     session = request.environ.get('beaker.session')
-    if not session or 'user' not in session:
-        return redirect('/login')
+    # if not session or 'user' not in session:
+    #     return redirect('/login')
     
     # Ensure background is set (for old sessions)
     if 'background' not in session:
         session['background'] = random.choice(BACKGROUNDS)
         session.save()
     
-    return template('dashboard.html', user=session['user'], background=session['background'])
+    return template('dashboard.html', user=USER, background=session['background'])
 
-@app.route('/logout')
-def logout():
-    session = request.environ.get('beaker.session')
-    session.delete()
-    session.invalidate()
+# @app.route('/logout')
+# def logout():
+#     session = request.environ.get('beaker.session')
+#     session.delete()
+#     session.invalidate()
 
-    return redirect('/')
+#     return redirect('/')
 
 run(session_app, host='localhost', port=8080, debug=True)
