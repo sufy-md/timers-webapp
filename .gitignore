@@ -4,3 +4,5 @@ proj
 sessions
 TODO
 venv
+views/signup.html
+views/login.html
