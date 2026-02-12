@@ -19,10 +19,17 @@ BACKGROUNDS = [
     "https://images.unsplash.com/photo-1622254835298-bc94b943bbd4?q=80&w=4298&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=4592&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1516797045820-6edca89b2830?q=80&w=2448&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop"
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1619441207978-3d326c46e2c9?q=80&w=6853&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1594087588915-6aa3c388474f?q=80&w=4912&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511634829096-045a111727eb?q=80&w=4695&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1740815882011-4463f689cd1b?q=80&w=4000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=3696&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563693998336-93c10e5d8f91?q=80&w=6000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1503435824048-a799a3a84bf7?q=80&w=3840&auto=format&fit=crop"
 ]
 
-LOGIN_BACKGROUND = "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=4096&auto=format&fit=crop"
+LOGIN_BACKGROUND = "https://images.unsplash.com/photo-1619441207978-3d326c46e2c9?q=80&w=6853&auto=format&fit=crop"
 
 os.environ['BEAKER_SESSION'] = '1'
 
